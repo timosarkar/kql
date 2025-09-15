@@ -1,0 +1,57 @@
+// Hunting for AutoRun Registry Modifications that might indicate persistence mechanisms
+let NewRegSets = DeviceRegistryEvents
+| where ActionType == "RegistryValueSet"
+| where RegistryKey has_any (
+    @"Microsoft\Windows\CurrentVersion\Run",
+    @"Microsoft\Windows\CurrentVersion\RunOnce",
+    @"Microsoft\Windows\CurrentVersion\Explorer\Shell Folders",
+    @"Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders",
+    @"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer",
+    @"\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run",
+    @"Session Manager",
+    @"Microsoft\Windows NT\CurrentVersion\Winlogon",
+    @"Microsoft\Windows NT\CurrentVersion\Windows",
+    @"Microsoft\Windows NT\CurrentVersion\Winlogon\Notify",
+    @"\Software\Microsoft\Windows\CurrentVersion\RunServices",
+    @"\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce")
+| where InitiatingProcessAccountDomain !has "nt"
+| where InitiatingProcessFileName has_any ( // Filter for known scripting, admin, or potentially abused binaries
+    "powershell.exe", "powershell_ise.exe", "reg.exe", "regedit.exe", "cmd.exe",
+    "winword.exe", "excel.exe", "powerpnt.exe", "wscript.exe", "cscript.exe",
+    "mshta.exe", "rundll32.exe", "wmic.exe", "schtasks.exe", "svchost.exe",
+    "java.exe", "python.exe", "perl.exe", "node.exe",
+    "outlook.exe", "onenote.exe", "chrome.exe", "firefox.exe",
+    "7z.exe", "7za.exe", "curl.exe", "wget.exe", "bitsadmin.exe", "certutil.exe",
+    "installutil.exe", "msbuild.exe", "vbc.exe", "xcopy.exe", "robocopy.exe",
+    "taskhostw.exe", "taskeng.exe", "conhost.exe", "dllhost.exe", "notepad.exe")
+// Define a set of registry value delete events that match the same suspicious criteria
+let RegDeletes = DeviceRegistryEvents
+| where ActionType == "RegistryValueDeleted" // Only include events where a registry value was deleted
+| where RegistryKey has_any ( // Same registry keys as above
+    @"Microsoft\Windows\CurrentVersion\Run",
+    @"Microsoft\Windows\CurrentVersion\RunOnce",
+    @"Microsoft\Windows\CurrentVersion\Explorer\Shell Folders",
+    @"Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders",
+    @"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer",
+    @"\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run",
+    @"Session Manager",
+    @"Microsoft\Windows NT\CurrentVersion\Winlogon",
+    @"Microsoft\Windows NT\CurrentVersion\Windows",
+    @"Microsoft\Windows NT\CurrentVersion\Winlogon\Notify",
+    @"\Software\Microsoft\Windows\CurrentVersion\RunServices",
+    @"\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce")
+| where InitiatingProcessAccountDomain !has "nt" // Exclude system-level accounts
+| where InitiatingProcessFileName has_any ( // Same list of potentially suspicious executables
+    "powershell.exe", "powershell_ise.exe", "reg.exe", "regedit.exe", "cmd.exe",
+    "winword.exe", "excel.exe", "powerpnt.exe", "wscript.exe", "cscript.exe",
+    "mshta.exe", "rundll32.exe", "wmic.exe", "schtasks.exe", "svchost.exe",
+    "java.exe", "python.exe", "perl.exe", "node.exe",
+    "outlook.exe", "onenote.exe", "chrome.exe", "firefox.exe",
+    "7z.exe", "7za.exe", "curl.exe", "wget.exe", "bitsadmin.exe", "certutil.exe",
+    "installutil.exe", "msbuild.exe", "vbc.exe", "xcopy.exe", "robocopy.exe",
+    "taskhostw.exe", "taskeng.exe", "conhost.exe", "dllhost.exe", "notepad.exe")
+// Identify registry set events that were not followed by a corresponding delete event
+NewRegSets
+| join kind=leftanti RegDeletes on RegistryKey, InitiatingProcessAccountDomain, InitiatingProcessFileName, RegistryValueName, RegistryValueData
+// Project relevant fields for investigation
+| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryValueName, RegistryValueDat
