@@ -37,7 +37,8 @@ for dirpath, _, filenames in os.walk(ROOT_DIR):
                 "description": description
             })
 
-with open("queries.json", "w", encoding="utf-8") as out:
+output_path = os.path.join("Frontend", "queries.json")
+with open(output_path, "w", encoding="utf-8") as out:
     json.dump(queries, out, indent=2)
 
 print(f"✅ Generated queries.json with {len(queries)} queries.")
