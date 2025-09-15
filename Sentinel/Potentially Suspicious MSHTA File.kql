@@ -1,0 +1,4 @@
+// Detect Potentially Suspicious MSHTA Files
+DeviceFileEvents
+| where FileName endswith ".hta"
+// Exclude known benign directories
