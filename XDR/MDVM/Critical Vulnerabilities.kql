@@ -1,0 +1,5 @@
+// Query to find devices with critical vulnerabilities from MDVM
+DeviceTvmSoftwareVulnerabilities
+| where VulnerabilitySeverityLevel == "Critical"
+| where RecommendedSecurityUpdate != ""
+| summarize Devices = make_list(DeviceName) by CveId, VulnerabilitySeverityLevel

@@ -1,0 +1,4 @@
+// Query to find devices with high vulnerabilities from MDVM
+DeviceTvmSoftwareVulnerabilities
+| where VulnerabilitySeverityLevel == "High"
+| summarize Devices = make_list(DeviceName) by CveId, VulnerabilitySeverityLevel
