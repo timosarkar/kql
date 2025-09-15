@@ -44,6 +44,6 @@ if __name__ == "__main__":
     if len(added_kql_files) == 0:
         print("No new KQL queries added in the last 7 days.")
     else:
-        print("New KQL queries added in the last 7 days:")
+        print(f"{len(added_kql_files)} New KQL queries added in the last 7 days:")
         for f in added_kql_files:
             print(f" - {f}")
