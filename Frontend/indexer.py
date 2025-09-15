@@ -2,7 +2,7 @@ import os
 import json
 import urllib.parse
 
-GITHUB_BASE_URL = "https://github.com/timosarkar/kql/blob/main"
+GITHUB_BASE_URL = "https://github.com/timosarkar"
 GITHUB_RAW_BASE = "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main"
 
 # Repo root (one level up from Frontend/)
