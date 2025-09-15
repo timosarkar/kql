@@ -2,7 +2,6 @@ import os
 import json
 import urllib.parse
 
-# Adjust these for your repo
 GITHUB_BASE_URL = "https://github.com/timosarkar/kql/blob/main"
 GITHUB_RAW_BASE = "https://raw.githubusercontent.com/timosarkar/kql/main"
 
