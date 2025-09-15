@@ -1,0 +1,4 @@
+// Query to find all macOS devices in the environment
+DeviceInfo
+| where OSPlatform == "macOS"
+| summarize by DeviceId;
