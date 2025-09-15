@@ -1,0 +1,3 @@
+// Hunt for vulnerable vibecoding editors
+DeviceEvents
+| where FileName has "cursor" or FileName has "windsurf"
