@@ -3,9 +3,10 @@ import json
 import urllib.parse
 
 GITHUB_BASE_URL = "https://github.com/timosarkar/kql/blob/main"
-GITHUB_RAW_BASE = "https://raw.githubusercontent.com/timosarkar/kql/main"
+GITHUB_RAW_BASE = "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main"
 
 ROOT_DIR = ".."
+OUTPUT_DIR = "Frontend"
 
 queries = []
 
@@ -37,7 +38,7 @@ for dirpath, _, filenames in os.walk(ROOT_DIR):
                 "description": description
             })
 
-output_path = os.path.join("Frontend", "queries.json")
+output_path = os.path.join(OUTPUT_DIR, "queries.json")
 with open(output_path, "w", encoding="utf-8") as out:
     json.dump(queries, out, indent=2)
 
