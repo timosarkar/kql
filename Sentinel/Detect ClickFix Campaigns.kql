@@ -1,0 +1,9 @@
+// Detect ClickFix Campaigns via RunMRU Registry Key Analysis
+let shells = dynamic(["powershell", "wscript", "pwsh", "cmd", "mshta", "curl"]);
+let ps_keywords = dynamic (["start-process", "hidden", "command", "bypass", "new-object", "http", "invoke", "iex", "-exec", "verification", "classname", "cimmethod", "methodname", "win32_process", "system.diagnostics.process", "system.management.automation", "Reflection.Assembly", "FromBase64String", "import-module", "add-type", "webclient", "-enc"]);
+let script_keywords = dynamic (["http", "javascript:", "verification", "eval", ".js", ".vbs", ".hta", ".bat"]);
+DeviceRegistryEvents
+    | where RegistryKey endswith @"\CurrentVersion\Explorer\RunMRU"
+    | where isnotempty( RegistryValueData )
+    | where RegistryValueData  has_any (shells) and RegistryValueData has_any(ps_keywords) or RegistryValueData has_any (script_keywords)
+    | where InitiatingProcessAccountName != "system"
