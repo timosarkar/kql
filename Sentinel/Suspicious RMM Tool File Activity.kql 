@@ -1,0 +1,21 @@
+// Detect RMM Tool FileEvents using SHA-1 and SHA256 hashes from Threat Intel Indicators table
+let RMMToolsSHA1 = ThreatIntelIndicators
+| where IsActive == true
+| where isnotempty(Data.labels)
+| mv-expand Data.labels
+| where Data_labels has "mitre"
+| extend MitreID = parse_json(tostring(Data_labels)).Alias
+| where MitreID == "T1219" // Remote Access Tools
+| where ObservableKey has "file:hashes.'SHA-1'"
+| project SHA1 = ObservableValue;
+let RMMToolsSHA256 = ThreatIntelIndicators
+| where IsActive == true
+| where isnotempty(Data.labels)
+| mv-expand Data.labels
+| where Data_labels has "mitre"
+| extend MitreID = parse_json(tostring(Data_labels)).Alias
+| where MitreID == "T1219" // Remote Access Tools
+| where ObservableKey has "file:hashes.'SHA-256'"
+| project SHA256 = ObservableValue;
+DeviceEvents
+| where SHA1 in (RMMToolsSHA1) or SHA256 in (RMMToolsSHA256)
