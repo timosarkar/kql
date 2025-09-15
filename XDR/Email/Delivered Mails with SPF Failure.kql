@@ -1,0 +1,5 @@
+// Hunt for delivered mails with SPF failure that might be phishing attempts
+EmailEvents
+| where AuthenticationDetails has "{\"SPF\":\"fail\""
+| where OrgLevelPolicy !has "Phishing simulation"
+| where DeliveryLocation == "Inbox/folder"

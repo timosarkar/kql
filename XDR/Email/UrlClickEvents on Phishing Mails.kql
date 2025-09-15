@@ -1,0 +1,8 @@
+// Detect URL click events on phishing emails excluding phishing simulations
+EmailEvents
+| where ThreatTypes has "Phish"
+| join kind=inner (
+    UrlClickEvents
+) on NetworkMessageId
+| where OrgLevelPolicy != "Phishing simulation"
+| project TimeGenerated, SenderFromAddress, SenderMailFromDomain, RecipientEmailAddress, ConfidenceLevel, DetectionMethods, NetworkMessageId
