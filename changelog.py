@@ -42,8 +42,8 @@ if __name__ == "__main__":
     repo_directory = '.'
     added_kql_files = get_new_kql_files_last_week(repo_directory)
     if len(added_kql_files) == 0:
-        print("No new .kql files added in the last 7 days.")
+        print("No new KQL queries added in the last 7 days.")
     else:
-        print("🆕 .kql files added in the last 7 days:")
+        print("New KQL queries added in the last 7 days:")
         for f in added_kql_files:
             print(f" - {f}")
