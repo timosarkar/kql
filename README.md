@@ -1,8 +1,8 @@
 # KQL Query & Threat Hunting Repository
 
-![GitHub last commit](https://img.shields.io/github/last-commit/timo-reymann/kql-query-repo)
-![GitHub repo size](https://img.shields.io/github/repo-size/timo-reymann/kql-query-repo)
-![GitHub license](https://img.shields.io/github/license/timo-reymann/kql-query-repo)
+![GitHub last commit](https://img.shields.io/github/last-commit/timosarkar/kql)
+![GitHub repo size](https://img.shields.io/github/repo-size/timosarkar/kql)
+![GitHub license](https://img.shields.io/github/license/timosarkar/kql)
 
 A curated repository of KQL queries and IoCs for threat hunting and detection in Microsoft Sentinel and Microsoft Defender XDR. This project is aimed at Security Engineers, SOC Analysts, and Threat Hunters.
 
