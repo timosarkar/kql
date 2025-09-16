@@ -4,289 +4,340 @@
   <meta charset="UTF-8">
   <title>KQL Query Explorer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-  <!-- Prism.js for syntax highlighting -->
-  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/themes/prism-tomorrow.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/prism.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-bash.min.js"></script>
-
+  <!-- Minimal CSS, no frameworks -->
   <style>
-    /* Custom animations and transitions */
-    .fade-in {
-      animation: fadeIn 0.3s ease-in-out;
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      background: #f8f8fa;
+      color: #222;
     }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
-
-    .modal-appear {
-      animation: modalAppear 0.2s ease-out;
+    h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 1rem 0 0.25rem 0;
+      text-align: center;
     }
-
-    @keyframes modalAppear {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+    .desc {
+      text-align: center;
+      color: #555;
+      margin-bottom: 2rem;
     }
-
-    .search-focus {
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    /* Custom scrollbar for modal */
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #374151;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #6b7280;
+    #search {
+      display: block;
+      margin: 0 auto 1rem auto;
+      width: 100%;
+      max-width: 500px;
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid #bbb;
       border-radius: 4px;
+      background: #fff;
+      box-sizing: border-box;
     }
-    
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #9ca3af;
+    #results-count {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #444;
+      font-size: 0.95rem;
     }
-
-    /* Gradient background */
-    .gradient-bg {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    #query-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 0.5rem;
     }
-
-    /* Glass morphism effect */
-    .glass {
-      backdrop-filter: blur(10px);
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+    .qcard {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: box-shadow 0.1s;
+      min-width: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .qcard:hover, .qcard:focus {
+      box-shadow: 0 2px 8px 0 #0001;
+      border-color: #aaa;
+    }
+    .qname {
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #22336b;
+      margin-bottom: 0.25rem;
+      word-break: break-word;
+    }
+    .qdesc {
+      color: #555;
+      font-size: 0.96rem;
+      margin-bottom: 0.25rem;
+      word-break: break-word;
+    }
+    .qlink {
+      font-size: 0.85rem;
+      color: #1976d2;
+      text-decoration: underline;
+      margin-top: auto;
+      margin-bottom: 0;
+    }
+    #empty-state {
+      text-align: center;
+      color: #bbb;
+      margin: 2rem 0;
+      display: none;
+    }
+    /* Modal Styles */
+    #query-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      align-items: center;
+      justify-content: center;
+    }
+    #query-modal.active {
+      display: flex;
+      animation: fadeInModal 0.12s;
+    }
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 4px;
+      max-width: 700px;
+      width: 98vw;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 32px #2223;
+      position: relative;
+      overflow: hidden;
+      animation: modalAppear 0.15s;
+    }
+    @keyframes modalAppear {
+      from { transform: scale(0.97); opacity: 0; }
+      to { transform: scale(1); opacity: 1;}
+    }
+    .modal-header {
+      padding: 1rem 1.5rem 0.5rem 1.5rem;
+      border-bottom: 1px solid #eee;
+      font-weight: bold;
+      font-size: 1.2rem;
+      background: #fff;
+      color: #19356c;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .modal-header a {
+      font-size: 0.95rem;
+      color: #1976d2;
+    }
+    .modal-close {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      padding: 0;
+      z-index: 20;
+      transition: color 0.1s;
+    }
+    .modal-close:hover {
+      color: #111;
+    }
+    .modal-body {
+      padding: 1rem 1.5rem;
+      overflow: auto;
+      font-family: "Fira Mono", "Consolas", monospace;
+      font-size: 0.99rem;
+      background: #f7f7fa;
+      color: #222;
+      flex: 1;
+    }
+    @media (max-width: 700px) {
+      .modal-content {
+        max-width: 98vw;
+        padding: 0;
+      }
+      .modal-header, .modal-body {
+        padding: 0.75rem 0.7rem;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen gradient-bg">
-
-<div class="container mx-auto px-4 py-8 max-w-6xl">
-  <!-- Header -->
-  <div class="text-center mb-10">
-    <h1 class="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-      KQL Query Explorer
-    </h1>
-    <p class="text-xl text-white/80 font-light">
-      Discover and explore Kusto Query Language examples
-    </p>
+<body>
+  <div class="container">
+    <h1>KQL Query Explorer</h1>
+    <div class="desc">Discover and explore Kusto Query Language examples</div>
+    <input id="search" type="text" placeholder="Search queries by name or description..." autocomplete="off" />
+    <div id="results-count"></div>
+    <div id="query-list"></div>
+    <div id="empty-state">No queries found. Try a different search.</div>
   </div>
 
-  <!-- Search Section -->
-  <div class="mb-8 max-w-2xl mx-auto">
-    <div class="relative">
-      <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
+  <div id="query-modal" tabindex="-1">
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modal-close" title="Close">&times;</button>
+      <div class="modal-header">
+        <span id="modal-query-name"></span>
+        <a id="modal-query-link" href="#" target="_blank" rel="noopener noreferrer">View on GitHub</a>
       </div>
-      <input id="search" type="text" placeholder="Search queries by name or description..." 
-             class="w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-0 shadow-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300/50 bg-white/95 backdrop-blur-sm">
+      <pre class="modal-body" id="modal-query-content"></pre>
     </div>
   </div>
+  
+  <script>
+    let queries = [];
+    let $ = selector => document.querySelector(selector);
+    let $$ = selector => document.querySelectorAll(selector);
 
-  <!-- Results count -->
-  <div id="results-count" class="text-center mb-6 text-white/70 font-medium"></div>
+    // Utility: Debounce
+    function debounce(fn, ms) {
+      let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), ms); };
+    }
 
-  <!-- Query Grid -->
-  <div id="query-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+    // Load queries.json
+    fetch('queries.json').then(r => r.json())
+      .then(data => { queries = data; renderList(queries); })
+      .catch(() => {
+        queries = [
+          {
+            name: "Sample KQL Query 1",
+            description: "Basic table filtering and projection",
+            file: "https://github.com/sample/query1.kql",
+            raw: "data:text/plain;base64," + btoa("// Sample KQL Query\nSecurityEvent\n| where TimeGenerated > ago(1d)\n| project TimeGenerated, Computer, EventID\n| take 100")
+          },
+          {
+            name: "Sample KQL Query 2", 
+            description: "Aggregation and time series analysis",
+            file: "https://github.com/sample/query2.kql",
+            raw: "data:text/plain;base64," + btoa("// Time series aggregation\nPerformanceCounters\n| where TimeGenerated > ago(7d)\n| summarize avg(CounterValue) by bin(TimeGenerated, 1h), CounterName\n| take 250")
+          },
+          {
+            name: "Advanced Analytics Query",
+            description: "Complex joins and statistical functions",
+            file: "https://github.com/sample/query3.kql",
+            raw: "data:text/plain;base64," + btoa("// Advanced analytics example\nSecurityEvent\n| where TimeGenerated > ago(30d)\n| join kind=inner (\n    IdentityInfo\n    | project AccountName, AccountType\n) on $left.Account = $right.AccountName\n| summarize count() by AccountType")
+          }
+        ];
+        renderList(queries);
+      });
 
-  <!-- Empty state -->
-  <div id="empty-state" class="hidden text-center py-16">
-    <svg class="mx-auto h-24 w-24 text-white/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.137 0-4.146-.832-5.657-2.343m0-3.314a7.963 7.963 0 0111.314 0M5 18.5h14A1.5 1.5 0 0120.5 17V7A1.5 1.5 0 0019 5.5H5A1.5 1.5 0 003.5 7v10A1.5 1.5 0 005 18.5z"></path>
-    </svg>
-    <h3 class="text-2xl font-medium text-white/70 mb-2">No queries found</h3>
-    <p class="text-white/50">Try adjusting your search terms</p>
-  </div>
-</div>
-
-<!-- Full-Screen Modal -->
-<div id="query-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-50 flex justify-center items-center p-4">
-  <div class="bg-gray-900 w-full max-w-7xl h-5/6 rounded-2xl shadow-2xl overflow-hidden relative modal-appear">
-    <!-- Close button -->
-    <button id="modal-close" class="absolute top-6 right-6 text-white/70 hover:text-white text-2xl w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all duration-200 z-10">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-      </svg>
-    </button>
-
-    <!-- Modal header -->
-    <div class="bg-gradient-to-r from-gray-800 to-gray-700 p-6 border-b border-gray-600">
-      <h2 id="modal-query-name" class="text-3xl font-bold text-white mb-2"></h2>
-      <a id="modal-query-link" target="_blank" class="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors duration-200">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-        </svg>
-        View on GitHub
-      </a>
-    </div>
-
-    <!-- Modal content -->
-    <div class="h-full overflow-auto custom-scrollbar bg-gray-900">
-      <pre class="p-6"><code id="modal-query-content" class="language-bash text-sm leading-relaxed"></code></pre>
-    </div>
-  </div>
-</div>
-
-<!-- Loading spinner -->
-<div id="loading" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center">
-  <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-    <p class="text-white mt-4 font-medium">Loading queries...</p>
-  </div>
-</div>
-
-<script>
-let queries = [];
-
-// Show loading state initially
-$('#loading').removeClass('hidden');
-
-// Load queries.json
-$.getJSON('queries.json')
-  .done(data => {
-    queries = data;
-    renderList(queries);
-    $('#loading').addClass('hidden');
-  })
-  .fail(() => {
-    $('#loading').addClass('hidden');
-    // Create sample data for demo
-    queries = [
-      {
-        name: "Sample KQL Query 1",
-        description: "Basic table filtering and projection",
-        file: "https://github.com/sample/query1.kql",
-        raw: "data:text/plain;base64," + btoa("// Sample KQL Query\nSecurityEvent\n| where TimeGenerated > ago(1d)\n| project TimeGenerated, Computer, EventID\n| take 100")
-      },
-      {
-        name: "Sample KQL Query 2", 
-        description: "Aggregation and time series analysis",
-        file: "https://github.com/sample/query2.kql",
-        raw: "data:text/plain;base64," + btoa("// Time series aggregation\nPerformanceCounters\n| where TimeGenerated > ago(7d)\n| summarize avg(CounterValue) by bin(TimeGenerated, 1h), CounterName\n| render timechart")
-      },
-      {
-        name: "Advanced Analytics Query",
-        description: "Complex joins and statistical functions",
-        file: "https://github.com/sample/query3.kql",
-        raw: "data:text/plain;base64=" + btoa("// Advanced analytics example\nSecurityEvent\n| where TimeGenerated > ago(30d)\n| join kind=inner (\n    IdentityInfo\n    | project AccountName, AccountDomain\n) on $left.Account == $right.AccountName\n| summarize EventCount = count() by AccountName, EventID\n| where EventCount > 10\n| order by EventCount desc")
+    // Render query cards (virtualized for thousands of results)
+    function renderList(list) {
+      const $container = $('#query-list');
+      const $resultsCount = $('#results-count');
+      const $empty = $('#empty-state');
+      $container.innerHTML = '';
+      if (list.length === 0) {
+        $resultsCount.textContent = '';
+        $empty.style.display = '';
+        return;
       }
-    ];
-    renderList(queries);
-  });
+      $empty.style.display = 'none';
+      $resultsCount.textContent = list.length + ' ' + (list.length === 1 ? 'query' : 'queries') + ' found';
+      // Virtual render if too many
+      const maxInitial = 100;
+      let renderedCount = Math.min(list.length, maxInitial);
+      for (let i = 0; i < renderedCount; ++i) {
+        $container.appendChild(makeCard(list[i], i));
+      }
+      if (list.length > maxInitial) {
+        let sentinel = document.createElement("div");
+        sentinel.id = "lazy-sentinel";
+        $container.appendChild(sentinel);
+        let nextIdx = maxInitial;
+        let observer = new IntersectionObserver((entries, obs) => {
+          if (entries[0].isIntersecting && nextIdx < list.length) {
+            let batch = Math.min(100, list.length - nextIdx);
+            for (let i = 0; i < batch; ++i) {
+              $container.insertBefore(makeCard(list[nextIdx], nextIdx), sentinel);
+              nextIdx++;
+            }
+            if (nextIdx >= list.length) {
+              observer.disconnect();
+              sentinel.remove();
+            }
+          }
+        }, { rootMargin: '200px' });
+        observer.observe(sentinel);
+      }
+    }
 
-// Search filter with debounce
-let searchTimeout;
-$('#search').on('input', function() {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    const term = $(this).val().toLowerCase();
-    const filtered = queries.filter(q =>
-      q.name.toLowerCase().includes(term) ||
-      (q.description && q.description.toLowerCase().includes(term))
-    );
-    renderList(filtered);
-  }, 300);
-});
+    function makeCard(q, idx) {
+      let card = document.createElement('div');
+      card.className = 'qcard';
+      card.tabIndex = 0;
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', q.name);
+      card.addEventListener('click', () => openModal(q));
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openModal(q); });
+      card.innerHTML = `
+        <div class="qname">${escapeHTML(q.name)}</div>
+        ${q.description ? `<div class="qdesc">${escapeHTML(q.description)}</div>` : ''}
+        <div style="font-size:0.85rem;color:#888;">KQL Query</div>
+      `;
+      return card;
+    }
 
-// Render query list
-function renderList(list) {
-  const $container = $('#query-list');
-  const $emptyState = $('#empty-state');
-  const $resultsCount = $('#results-count');
-  
-  $container.empty();
-  
-  if (list.length === 0) {
-    $emptyState.removeClass('hidden');
-    $resultsCount.text('');
-    return;
-  }
-  
-  $emptyState.addClass('hidden');
-  $resultsCount.text(`${list.length} ${list.length === 1 ? 'query' : 'queries'} found`);
-  
-  list.forEach((q, index) => {
-    const $card = $(`
-      <div class="group bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1 hover:bg-white fade-in overflow-hidden"
-           style="animation-delay: ${index * 0.05}s">
-        <div class="p-6">
-          <div class="flex items-start justify-between mb-3">
-            <h3 class="font-bold text-xl text-gray-800 group-hover:text-blue-600 transition-colors duration-200 leading-tight">${q.name}</h3>
-            <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors duration-200 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-            </svg>
-          </div>
-          ${q.description ? `
-            <p class="text-gray-600 text-sm leading-relaxed mb-4">${q.description}</p>
-          ` : ""}
-          <div class="flex items-center text-xs text-gray-400">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-            </svg>
-            KQL Query
-          </div>
-        </div>
-        <div class="h-1 bg-gradient-to-r from-blue-500 to-purple-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-      </div>
-    `);
-    
-    $card.on('click', () => openModal(q));
-    $container.append($card);
-  });
-}
+    // Minimal modal logic
+    function openModal(q) {
+      $('#query-modal').classList.add('active');
+      $('#modal-query-name').textContent = q.name;
+      $('#modal-query-link').href = q.file;
+      $('#modal-query-content').textContent = 'Loading query content...';
+      fetch(q.raw)
+        .then(r => r.text())
+        .then(txt => { $('#modal-query-content').textContent = txt; })
+        .catch(() => { $('#modal-query-content').textContent = 'Error loading query content.'; });
+      // Trap focus for accessibility
+      $('#modal-close').focus();
+    }
 
-// Open modal and load query content
-async function openModal(q) {
-  $('#query-modal').removeClass('hidden');
-  $('#modal-query-name').text(q.name);
-  $('#modal-query-link').attr('href', q.file);
-  $('#modal-query-content').text('Loading query content...');
+    $('#modal-close').onclick = () => $('#query-modal').classList.remove('active');
+    $('#query-modal').onclick = e => { if (e.target === $('#query-modal')) $('#query-modal').classList.remove('active'); };
+    document.addEventListener('keydown', e => {
+      if ($('#query-modal').classList.contains('active') && e.key === 'Escape') {
+        $('#query-modal').classList.remove('active');
+      }
+    });
 
-  try {
-    const res = await fetch(q.raw);
-    const text = await res.text();
-    // Escape HTML for Prism
-    const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    $('#modal-query-content').html(escaped);
-    Prism.highlightElement(document.getElementById('modal-query-content'));
-  } catch (err) {
-    $('#modal-query-content').text('⚠️ Error loading query content. Please check the source link.');
-  }
-}
+    // Search logic with debounce
+    $('#search').addEventListener('input', debounce(function() {
+      const term = this.value.trim().toLowerCase();
+      const filtered = queries.filter(q =>
+        (q.name && q.name.toLowerCase().includes(term)) ||
+        (q.description && q.description.toLowerCase().includes(term))
+      );
+      renderList(filtered);
+    }, 250));
 
-// Close modal
-$('#modal-close').on('click', () => $('#query-modal').addClass('hidden'));
+    // Focus search on load
+    window.onload = () => { $('#search').focus(); };
 
-// Close modal when clicking outside content
-$('#query-modal').on('click', function(e) {
-  if (e.target === this) $(this).addClass('hidden');
-});
-
-// Close modal with Escape key
-$(document).on('keydown', function(e) {
-  if (e.key === 'Escape') {
-    $('#query-modal').addClass('hidden');
-  }
-});
-
-// Focus search on page load
-$(document).ready(function() {
-  $('#search').focus();
-});
-</script>
-
+    // Utils
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, s => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[s]);
+    }
+  </script>
 </body>
 </html>
