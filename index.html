@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>KQL Query Explorer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      background: #f8f8fa;
+      color: #222;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 1rem 0 0.25rem 0;
+      text-align: center;
+    }
+    .desc {
+      text-align: center;
+      color: #555;
+      margin-bottom: 2rem;
+    }
+    #search {
+      display: block;
+      margin: 0 auto 1rem auto;
+      width: 100%;
+      max-width: 500px;
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      background: #fff;
+      box-sizing: border-box;
+    }
+    #results-count {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #444;
+      font-size: 0.95rem;
+    }
+    #query-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 0.5rem;
+    }
+    .qcard {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: box-shadow 0.1s;
+      min-width: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .qcard:hover, .qcard:focus {
+      box-shadow: 0 2px 8px 0 #0001;
+      border-color: #aaa;
+    }
+    .qname {
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #22336b;
+      margin-bottom: 0.25rem;
+      word-break: break-word;
+    }
+    .qdesc {
+      color: #555;
+      font-size: 0.96rem;
+      margin-bottom: 0.25rem;
+      word-break: break-word;
+    }
+    .qlink {
+      font-size: 0.85rem;
+      color: #1976d2;
+      text-decoration: underline;
+      margin-top: auto;
+      margin-bottom: 0;
+    }
+    #empty-state {
+      text-align: center;
+      color: #bbb;
+      margin: 2rem 0;
+      display: none;
+    }
+    /* Modal Styles */
+    #query-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      align-items: center;
+      justify-content: center;
+    }
+    #query-modal.active {
+      display: flex;
+      animation: fadeInModal 0.12s;
+    }
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 4px;
+      max-width: 700px;
+      width: 98vw;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 32px #2223;
+      position: relative;
+      overflow: hidden;
+      animation: modalAppear 0.15s;
+    }
+    @keyframes modalAppear {
+      from { transform: scale(0.97); opacity: 0; }
+      to { transform: scale(1); opacity: 1;}
+    }
+    .modal-header {
+      padding: 1rem 1.5rem 0.5rem 1.5rem;
+      border-bottom: 1px solid #eee;
+      font-weight: bold;
+      font-size: 1.2rem;
+      background: #fff;
+      color: #19356c;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .modal-header a {
+      font-size: 0.95rem;
+      color: #1976d2;
+    }
+    .modal-close {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      padding: 0;
+      z-index: 20;
+      transition: color 0.1s;
+    }
+    .modal-close:hover {
+      color: #111;
+    }
+    .modal-body {
+      padding: 1rem 1.5rem;
+      overflow: auto;
+      font-family: "Fira Mono", "Consolas", monospace;
+      font-size: 0.99rem;
+      background: #f7f7fa;
+      color: #222;
+      flex: 1;
+    }
+    @media (max-width: 700px) {
+      .modal-content {
+        max-width: 98vw;
+        padding: 0;
+      }
+      .modal-header, .modal-body {
+        padding: 0.75rem 0.7rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>KQL Query Explorer</h1>
+    <div class="desc">Discover and explore Kusto Query Language examples</div>
+    <input id="search" type="text" placeholder="Search queries by name or description..." autocomplete="off" />
+    <div id="results-count"></div>
+    <div id="query-list"></div>
+    <div id="empty-state">No queries found. Try a different search.</div>
+  </div>
+
+  <div id="query-modal" tabindex="-1">
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modal-close" title="Close">&times;</button>
+      <div class="modal-header">
+        <span id="modal-query-name"></span>
+        <a id="modal-query-link" href="#" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+      </div>
+      <pre class="modal-body" id="modal-query-content"></pre>
+    </div>
+  </div>
+  
+  <script>
+    let queries = [];
+    let $ = selector => document.querySelector(selector);
+    let $$ = selector => document.querySelectorAll(selector);
+
+    // Utility: Debounce
+    function debounce(fn, ms) {
+      let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), ms); };
+    }
+
+    // Load queries.json
+    fetch('queries.json').then(r => r.json())
+      .then(data => { queries = data; renderList(queries); })
+      .catch(() => {
+        queries = [
+          {
+            name: "Sample KQL Query 1",
+            description: "Basic table filtering and projection",
+            file: "https://github.com/sample/query1.kql",
+            raw: "data:text/plain;base64," + btoa("// Sample KQL Query\nSecurityEvent\n| where TimeGenerated > ago(1d)\n| project TimeGenerated, Computer, EventID\n| take 100")
+          },
+          {
+            name: "Sample KQL Query 2", 
+            description: "Aggregation and time series analysis",
+            file: "https://github.com/sample/query2.kql",
+            raw: "data:text/plain;base64," + btoa("// Time series aggregation\nPerformanceCounters\n| where TimeGenerated > ago(7d)\n| summarize avg(CounterValue) by bin(TimeGenerated, 1h), CounterName\n| take 250")
+          },
+          {
+            name: "Advanced Analytics Query",
+            description: "Complex joins and statistical functions",
+            file: "https://github.com/sample/query3.kql",
+            raw: "data:text/plain;base64," + btoa("// Advanced analytics example\nSecurityEvent\n| where TimeGenerated > ago(30d)\n| join kind=inner (\n    IdentityInfo\n    | project AccountName, AccountType\n) on $left.Account = $right.AccountName\n| summarize count() by AccountType")
+          }
+        ];
+        renderList(queries);
+      });
+
+    // Render query cards (virtualized for thousands of results)
+    function renderList(list) {
+      const $container = $('#query-list');
+      const $resultsCount = $('#results-count');
+      const $empty = $('#empty-state');
+      $container.innerHTML = '';
+      if (list.length === 0) {
+        $resultsCount.textContent = '';
+        $empty.style.display = '';
+        return;
+      }
+      $empty.style.display = 'none';
+      $resultsCount.textContent = list.length + ' ' + (list.length === 1 ? 'query' : 'queries') + ' found';
+      // Virtual render if too many
+      const maxInitial = 100;
+      let renderedCount = Math.min(list.length, maxInitial);
+      for (let i = 0; i < renderedCount; ++i) {
+        $container.appendChild(makeCard(list[i], i));
+      }
+      if (list.length > maxInitial) {
+        let sentinel = document.createElement("div");
+        sentinel.id = "lazy-sentinel";
+        $container.appendChild(sentinel);
+        let nextIdx = maxInitial;
+        let observer = new IntersectionObserver((entries, obs) => {
+          if (entries[0].isIntersecting && nextIdx < list.length) {
+            let batch = Math.min(100, list.length - nextIdx);
+            for (let i = 0; i < batch; ++i) {
+              $container.insertBefore(makeCard(list[nextIdx], nextIdx), sentinel);
+              nextIdx++;
+            }
+            if (nextIdx >= list.length) {
+              observer.disconnect();
+              sentinel.remove();
+            }
+          }
+        }, { rootMargin: '200px' });
+        observer.observe(sentinel);
+      }
+    }
+
+    function makeCard(q, idx) {
+      let card = document.createElement('div');
+      card.className = 'qcard';
+      card.tabIndex = 0;
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', q.name);
+      card.addEventListener('click', () => openModal(q));
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openModal(q); });
+      card.innerHTML = `
+        <div class="qname">${escapeHTML(q.name)}</div>
+        ${q.description ? `<div class="qdesc">${escapeHTML(q.description)}</div>` : ''}
+        <div style="font-size:0.85rem;color:#888;">KQL Query</div>
+      `;
+      return card;
+    }
+
+    // Minimal modal logic
+    function openModal(q) {
+      $('#query-modal').classList.add('active');
+      $('#modal-query-name').textContent = q.name;
+      $('#modal-query-link').href = q.file;
+      $('#modal-query-content').textContent = 'Loading query content...';
+      fetch(q.raw)
+        .then(r => r.text())
+        .then(txt => { $('#modal-query-content').textContent = txt; })
+        .catch(() => { $('#modal-query-content').textContent = 'Error loading query content.'; });
+      // Trap focus for accessibility
+      $('#modal-close').focus();
+    }
+
+    $('#modal-close').onclick = () => $('#query-modal').classList.remove('active');
+    $('#query-modal').onclick = e => { if (e.target === $('#query-modal')) $('#query-modal').classList.remove('active'); };
+    document.addEventListener('keydown', e => {
+      if ($('#query-modal').classList.contains('active') && e.key === 'Escape') {
+        $('#query-modal').classList.remove('active');
+      }
+    });
+
+    // Search logic with debounce
+    $('#search').addEventListener('input', debounce(function() {
+      const term = this.value.trim().toLowerCase();
+      const filtered = queries.filter(q =>
+        (q.name && q.name.toLowerCase().includes(term)) ||
+        (q.description && q.description.toLowerCase().includes(term))
+      );
+      renderList(filtered);
+    }, 250));
+
+    // Focus search on load
+    window.onload = () => { $('#search').focus(); };
+
+    // Utils
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, s => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[s]);
+    }
+  </script>
+</body>
+</html>

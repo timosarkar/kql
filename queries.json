@@ -1,0 +1,74 @@
+[
+  {
+    "name": "HybridPetya Detection Rule.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/Sentinel/HybridPetya%20Detection%20Rule.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/Sentinel/HybridPetya%20Detection%20Rule.kql",
+    "description": "Hunt for HybridPetya random filenames and known file hashes"
+  },
+  {
+    "name": "Detect ClickFix Campaigns.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/Sentinel/Detect%20ClickFix%20Campaigns.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/Sentinel/Detect%20ClickFix%20Campaigns.kql",
+    "description": "Detect ClickFix Campaigns via RunMRU Registry Key Analysis"
+  },
+  {
+    "name": "Potentially Suspicious MSHTA File.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/Sentinel/Potentially%20Suspicious%20MSHTA%20File.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/Sentinel/Potentially%20Suspicious%20MSHTA%20File.kql",
+    "description": "Detect Potentially Suspicious MSHTA Files"
+  },
+  {
+    "name": "Hunting for AutoRun Registry Modifications.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/Sentinel/Hunting%20for%20AutoRun%20Registry%20Modifications.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/Sentinel/Hunting%20for%20AutoRun%20Registry%20Modifications.kql",
+    "description": "Hunting for AutoRun Registry Modifications that might indicate persistence mechanisms"
+  },
+  {
+    "name": "Hunting for compromised npm packages.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/Sentinel/Hunting%20for%20compromised%20npm%20packages.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/Sentinel/Hunting%20for%20compromised%20npm%20packages.kql",
+    "description": "Hunt for compromised npm packages: https://www.ox.security/blog/npm-packages-compromised/"
+  },
+  {
+    "name": "Hunt for vulnerable vibecoding editors.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/Sentinel/Hunt%20for%20vulnerable%20vibecoding%20editors.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/Sentinel/Hunt%20for%20vulnerable%20vibecoding%20editors.kql",
+    "description": "Hunt for vulnerable vibecoding editors"
+  },
+  {
+    "name": "High Vulnerabilities.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/XDR/MDVM/High%20Vulnerabilities.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/XDR/MDVM/High%20Vulnerabilities.kql",
+    "description": "Query to find devices with high vulnerabilities from MDVM"
+  },
+  {
+    "name": "Critical Vulnerabilities.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/XDR/MDVM/Critical%20Vulnerabilities.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/XDR/MDVM/Critical%20Vulnerabilities.kql",
+    "description": "Query to find devices with critical vulnerabilities from MDVM"
+  },
+  {
+    "name": "Password Never Expires.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/XDR/Defender%20Advanced%20Hunting/Password%20Never%20Expires.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/XDR/Defender%20Advanced%20Hunting/Password%20Never%20Expires.kql",
+    "description": "Hunt for Users where Password Never Expires"
+  },
+  {
+    "name": "Delivered Mails with SPF Failure.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/XDR/Email/Delivered%20Mails%20with%20SPF%20Failure.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/XDR/Email/Delivered%20Mails%20with%20SPF%20Failure.kql",
+    "description": "Hunt for delivered mails with SPF failure that might be phishing attempts"
+  },
+  {
+    "name": "UrlClickEvents on Phishing Mails.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/XDR/Email/UrlClickEvents%20on%20Phishing%20Mails.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/XDR/Email/UrlClickEvents%20on%20Phishing%20Mails.kql",
+    "description": "Detect URL click events on phishing emails excluding phishing simulations"
+  },
+  {
+    "name": "Hunting for MacOS Devices.kql",
+    "file": "https://github.com/timosarkar/kql/blob/main/XDR/Endpoints/Hunting%20for%20MacOS%20Devices.kql",
+    "raw": "https://raw.githubusercontent.com/timosarkar/kql/refs/heads/main/XDR/Endpoints/Hunting%20for%20MacOS%20Devices.kql",
+    "description": "Query to find all macOS devices in the environment"
+  }
+]
