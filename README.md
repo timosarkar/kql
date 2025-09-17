@@ -50,7 +50,7 @@ The repository is organized as follows:
 To use these queries, you can either clone this repository or browse the files directly.
 
 ```bash
-git clone https://github.com/timo-reymann/kql-query-repo.git
+git clone https://github.com/timosarkar/kql.git
 ```
 
 The queries are in `.kql` files and can be copied and pasted directly into the advanced hunting interface of the respective Microsoft security product.
